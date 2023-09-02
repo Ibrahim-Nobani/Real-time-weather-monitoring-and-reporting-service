@@ -7,7 +7,7 @@ using Models;
 using DataParsers;
 using WeatherConfigurationInterfaces;
 using WeatherBots;
-
+using InputHelpers;
 public class Program
 {
     static void Main(string[] args)
@@ -34,7 +34,7 @@ public class Program
             IWeatherDataParsingStrategy parsingStrategy = parsingStrategies[option];
             WeatherDataParser dataParser = new WeatherDataParser(parsingStrategy);
 
-            string userInputFile = ReadInputHelper.GetStringInput("Enter weather data file:");
+            string userInputFile = readConsoleInputFile(option);
             WeatherData weatherData = dataParser.Parse(userInputFile);
 
             ConfigureBots(weatherMonitor, configurationManager);
@@ -60,9 +60,24 @@ public class Program
         }
     }
 
+    static string readConsoleInputFile(ParsingStrategyOption option)
+    {
+        if (option == ParsingStrategyOption.JsonOption)
+        {
+            return FileInputHelper.ReadJsonFile("Enter JSON weather data file: ");
+        }
+        else if (option == ParsingStrategyOption.XmlOption)
+        {
+            return FileInputHelper.ReadXmlFile("Enter XML weather data file: ");
+        }
+        return null;
+    }
+
     static void ConfigureBots(WeatherMonitor weatherMonitor, ConfigurationManager configurationManager)
     {
-        Dictionary<string, IWeatherConfiguration> botConfigurations = configurationManager.LoadBotConfigurations();
+        string configFilePath = FileInputHelper.ReadJsonFile("Enter bot configuration data file: ");
+
+        Dictionary<string, IWeatherConfiguration> botConfigurations = configurationManager.LoadBotConfigurations(configFilePath);
         botConfigurations.Where(botConfiguration => botConfiguration.Value.Enabled).ToList()
         .ForEach(botConfiguration => weatherMonitor.AddObserver(new WeatherBotObserver(botConfiguration.Value)));
     }

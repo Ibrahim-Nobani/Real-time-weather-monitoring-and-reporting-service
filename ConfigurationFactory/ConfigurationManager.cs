@@ -4,33 +4,32 @@ namespace ConfigurationFactory
 {
     public class ConfigurationManager
     {
-        private readonly string configFilePath = "BotConfig.json";
         private readonly Dictionary<string, IBotConfigurationFactory> botFactories = new Dictionary<string, IBotConfigurationFactory>
-    {
-        { "RainBot", new RainBotConfigurationFactory() },
-        { "SunBot", new SunBotConfigurationFactory() },
-        { "SnowBot", new SnowBotConfigurationFactory() }
-    };
+        {
+            { "RainBot", new RainBotConfigurationFactory() },
+            { "SunBot", new SunBotConfigurationFactory() },
+            { "SnowBot", new SnowBotConfigurationFactory() }
+        };
 
-        public Dictionary<string, IWeatherConfiguration> LoadBotConfigurations()
+        public Dictionary<string, IWeatherConfiguration> LoadBotConfigurations(string configFilePath)
         {
             string configJson = File.ReadAllText(configFilePath);
             var botConfigData = JsonSerializer.Deserialize<Dictionary<string, dynamic>>(configJson);
             var configurations = new Dictionary<string, IWeatherConfiguration>();
 
-            foreach (var kvp in botConfigData)
+            foreach (var singleBotConfigData in botConfigData)
             {
-                if (botFactories.TryGetValue(kvp.Key, out IBotConfigurationFactory factory))
+                if (botFactories.TryGetValue(singleBotConfigData.Key, out IBotConfigurationFactory factory))
                 {
-                    string fullTypeName = "WeatherBots." + kvp.Key;
+                    string fullTypeName = "WeatherBots." + singleBotConfigData.Key;
                     Type classType = Type.GetType(fullTypeName);
-                    IWeatherConfiguration? config = JsonSerializer.Deserialize(kvp.Value, classType) as IWeatherConfiguration;
+                    IWeatherConfiguration? config = JsonSerializer.Deserialize(singleBotConfigData.Value, classType) as IWeatherConfiguration;
                     IWeatherConfiguration botConfig = factory.CreateConfiguration(config);
-                    configurations.Add(kvp.Key, botConfig);
+                    configurations.Add(singleBotConfigData.Key, botConfig);
                 }
                 else
                 {
-                    Console.WriteLine($"Unsupported bot type: {kvp.Key}");
+                    Console.WriteLine($"Unsupported bot type: {singleBotConfigData.Key}");
                 }
             }
 
