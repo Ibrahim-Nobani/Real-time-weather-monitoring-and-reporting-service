@@ -1,20 +1,25 @@
-using Models;
+using Newtonsoft.Json;
 using WeatherConfigurationInterfaces;
-namespace WeatherBots
-{
-    public class RainBot : IWeatherConfigurationHumidity
-    {
-        public bool Enabled { get; set; }
-        public string Message { get; set; }
-        public decimal HumidityThreshold { get; set; }
 
-        public void ProcessWeatherData(WeatherData data)
+public class RainBot : IWeatherBotHumidity
+{
+    public bool Enabled { get; set; }
+    public string Message { get; set; }
+    public decimal HumidityThreshold { get; set; }
+
+    private IPrintingService _printingService;
+
+    public void SetPrintingService(IPrintingService printingService)
+    {
+        _printingService = printingService;
+    }
+
+    public void ProcessWeatherData(IWeatherData data)
+    {
+        if (data.Humidity > HumidityThreshold)
         {
-            if (data.Humidity > HumidityThreshold)
-            {
-                Console.WriteLine("RainBot activated!");
-                Console.WriteLine($"RainBot: \"{Message}\"");
-            }
+            _printingService.Print("RainBot activated!");
+            _printingService.Print($"RainBot: \"{Message}\"");
         }
     }
 }
