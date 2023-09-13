@@ -1,6 +1,6 @@
 namespace WeatherConfigurationInterfaces
 {
-    public interface IWeatherConfigurationTemperature : IWeatherConfiguration
+    public interface IWeatherBotTemperature : IWeatherBot
     {
         decimal TemperatureThreshold { get; set; }
     }
