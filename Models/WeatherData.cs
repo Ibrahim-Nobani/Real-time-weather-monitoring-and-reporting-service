@@ -1,6 +1,6 @@
 namespace Models
 {
-    public class WeatherData
+    public class WeatherData : IWeatherData
     {
         public string Location { get; set; }
         public decimal Temperature { get; set; }
