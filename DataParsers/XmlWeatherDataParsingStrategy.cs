@@ -6,8 +6,8 @@ namespace DataParsers
     {
         public WeatherData ParseData(string dataFile)
         {
-            string configXml = File.ReadAllText(dataFile);
-            XElement xml = XElement.Parse(configXml);
+            //string configXml = File.ReadAllText(dataFile);
+            XElement xml = XElement.Parse(dataFile);
             return new WeatherData
             {
                 Location = xml.Element("Location").Value,

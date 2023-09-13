@@ -6,8 +6,8 @@ namespace DataParsers
     {
         public WeatherData ParseData(string dataFile)
         {
-            string configJson = File.ReadAllText(dataFile);
-            return JsonSerializer.Deserialize<WeatherData>(configJson);
+            //string configJson = File.ReadAllText(dataFile);
+            return JsonSerializer.Deserialize<WeatherData>(dataFile);
         }
     }
 }

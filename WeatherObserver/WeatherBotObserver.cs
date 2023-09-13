@@ -4,9 +4,9 @@ namespace WeatherObserver
 {
     public class WeatherBotObserver : IWeatherObserver
     {
-        private IWeatherConfiguration _weatherBot;
+        private IWeatherBot _weatherBot;
 
-        public WeatherBotObserver(IWeatherConfiguration bot)
+        public WeatherBotObserver(IWeatherBot bot)
         {
             _weatherBot = bot;
         }
