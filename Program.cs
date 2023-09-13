@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using WeatherObserver;
-using ConfigurationFactory;
+using ConfigurationManagers;
 using Models;
 using DataParsers;
 using WeatherConfigurationInterfaces;
@@ -13,7 +13,8 @@ public class Program
     static void Main(string[] args)
     {
         WeatherMonitor weatherMonitor = new WeatherMonitor();
-        ConfigurationManager configurationManager = new ConfigurationManager();
+        IPrintingService printingService = new PrintingService();
+        ConfigurationManager configurationManager = new ConfigurationManager(printingService);
 
         Dictionary<ParsingStrategyOption, IWeatherDataParsingStrategy> parsingStrategies =
             new Dictionary<ParsingStrategyOption, IWeatherDataParsingStrategy>
@@ -35,9 +36,15 @@ public class Program
             WeatherDataParser dataParser = new WeatherDataParser(parsingStrategy);
 
             string userInputFile = readConsoleInputFile(option);
-            WeatherData weatherData = dataParser.Parse(userInputFile);
+            string config = File.ReadAllText(userInputFile);
+            WeatherData weatherData = dataParser.Parse(config);
 
-            ConfigureBots(weatherMonitor, configurationManager);
+            var ObserverBotsConfigurationManager = new ObserverBotsConfigurationManager(configurationManager, weatherMonitor);
+
+            string configFilePath = FileInputHelper.ReadJsonFile("Enter bot configuration data file: ");
+            string configJson = File.ReadAllText(configFilePath);
+            
+            ObserverBotsConfigurationManager.AddEnabledBotObservers(configJson);
             weatherMonitor.NotifyObservers(weatherData);
         }
     }
@@ -71,14 +78,5 @@ public class Program
             return FileInputHelper.ReadXmlFile("Enter XML weather data file: ");
         }
         return null;
-    }
-
-    static void ConfigureBots(WeatherMonitor weatherMonitor, ConfigurationManager configurationManager)
-    {
-        string configFilePath = FileInputHelper.ReadJsonFile("Enter bot configuration data file: ");
-
-        Dictionary<string, IWeatherConfiguration> botConfigurations = configurationManager.LoadBotConfigurations(configFilePath);
-        botConfigurations.Where(botConfiguration => botConfiguration.Value.Enabled).ToList()
-        .ForEach(botConfiguration => weatherMonitor.AddObserver(new WeatherBotObserver(botConfiguration.Value)));
     }
 }
